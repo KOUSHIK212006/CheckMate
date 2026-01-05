@@ -1,0 +1,495 @@
+/* =========================
+   GLOBAL VARIABLES
+========================= */
+:root {
+  --primary: #4f46e5;
+  --secondary: #06b6d4;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* =========================
+   GLOBAL STYLES
+========================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+/* =========================
+   GRADIENT TEXT UTILITY
+========================= */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* =========================
+   APP LAYOUT
+========================= */
+.app {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 1.2s ease forwards;
+  padding: 2rem;
+}
+
+.page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* =========================
+   CHESSBOARD BACKGROUND
+========================= */
+.app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.02) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.02) 75%);
+  background-size: 60px 60px;
+  background-position: 0 0, 0 30px, 30px -30px, -30px 0;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* =========================
+   NEON GLOW ORB
+========================= */
+.glow {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(79,70,229,0.45), transparent 70%);
+  filter: blur(140px);
+  animation: glowPulse 6s infinite alternate;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* =========================
+   GLASS CARD
+========================= */
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+  padding: 3.2rem;
+  border-radius: 22px;
+
+  background: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
+
+  text-align: center;
+  animation: cardRise 1.3s ease forwards;
+}
+
+/* =========================
+   LOGO / TITLE
+========================= */
+.logo {
+  font-size: 3.2rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.logo span {
+  display: inline-block;
+  animation: logoPop 1s ease forwards;
+}
+
+/* =========================
+   SUBTITLE
+========================= */
+.subtitle {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: slideUp 0.8s ease forwards;
+  animation-delay: 0.9s;
+}
+
+/* =========================
+   DESCRIPTION
+========================= */
+.description {
+  margin-top: 1.8rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-main);
+  opacity: 0;
+  animation: slideUp 0.8s ease forwards;
+  animation-delay: 1.2s;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+.actions {
+  margin-top: 2.6rem;
+  display: flex;
+  gap: 1.2rem;
+  opacity: 0;
+  animation: slideUp 0.8s ease forwards;
+  animation-delay: 1.5s;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+/* Organizer = CHECK */
+.btn.organizer {
+  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  color: white;
+  border: none;
+}
+
+.btn.organizer:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 40px rgba(79,70,229,0.8);
+}
+
+/* Participant = MATE */
+.btn.participant {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid #334155;
+}
+
+.btn.participant:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+/* =========================
+   FOOTER
+========================= */
+.footer {
+  margin-top: 3rem;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: slideUp 0.8s ease forwards;
+  animation-delay: 1.8s;
+}
+
+/* =========================
+   MODERN FORM ELEMENTS
+========================= */
+input, textarea, select {
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  outline: none;
+  width: 100%;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* =========================
+   SCROLLBAR STYLING
+========================= */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #3730a3, #0891b2);
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  from { opacity: 0.4; }
+  to   { opacity: 0.85; }
+}
+
+@keyframes cardRise {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes logoPop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* =========================
+   LOADING OVERLAY
+========================= */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(2, 6, 23, 0.9);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.loading-card {
+  text-align: center;
+}
+
+.loading-logo {
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  margin-bottom: 0.8rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loading-text {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* =========================
+   QR SCANNER STYLING
+========================= */
+#qr-reader {
+  background: rgba(15, 23, 42, 0.8) !important;
+}
+
+#qr-reader video {
+  border-radius: 12px !important;
+}
+
+#qr-reader__dashboard {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-radius: 0 0 16px 16px !important;
+  padding: 1rem !important;
+}
+
+#qr-reader__dashboard_section {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+#qr-reader__dashboard_section_csr button {
+  background: linear-gradient(135deg, #4f46e5, #06b6d4) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  margin: 4px !important;
+}
+
+#qr-reader__dashboard_section_fsr button {
+  background: rgba(148, 163, 184, 0.2) !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 8px !important;
+  color: #f1f5f9 !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  margin: 4px !important;
+}
+
+#qr-reader__dashboard_section_fsr input[type="file"] {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 2px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 8px !important;
+  color: #f1f5f9 !important;
+  padding: 8px !important;
+}
+
+#qr-reader__status_span {
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+@media (max-width: 768px) {
+  .app {
+    padding: 1rem;
+  }
+  
+  .card {
+    padding: 2rem;
+    max-width: 100%;
+  }
+  
+  .logo {
+    font-size: 2.5rem;
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .logo {
+    font-size: 2rem;
+  }
+}
