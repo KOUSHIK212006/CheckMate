@@ -92,20 +92,19 @@ export default function SessionJoin() {
   };
 
   const startPopupSchedule = () => {
-    const totalPopups = questions.length; // Use all questions
+    // Only schedule automatic popups if timing is set to random
+    if (popupSettings.timing !== "random") {
+      return; // Manual mode - no automatic popups
+    }
+    
+    const totalPopups = questions.length;
     const baseInterval = popupSettings.interval * 1000;
     
     let count = 0;
     const scheduleNext = () => {
       if (count < totalPopups) {
-        let delay;
-        
-        if (popupSettings.timing === "random") {
-          const randomFactor = 0.5 + Math.random();
-          delay = baseInterval * randomFactor * count;
-        } else {
-          delay = baseInterval * count;
-        }
+        const randomFactor = 0.5 + Math.random();
+        const delay = baseInterval * randomFactor * count;
         
         setTimeout(() => {
           setCurrentQuestion(questions[count]);
@@ -113,9 +112,7 @@ export default function SessionJoin() {
           count++;
         }, delay);
       } else {
-        const finalDelay = popupSettings.timing === "random" 
-          ? baseInterval * (1 + Math.random()) * totalPopups + 2000
-          : baseInterval * totalPopups + 2000;
+        const finalDelay = baseInterval * (1 + Math.random()) * totalPopups + 2000;
           
         setTimeout(() => {
           navigate(`/session/${sessionId}/complete`);

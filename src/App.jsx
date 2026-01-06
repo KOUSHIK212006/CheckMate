@@ -33,7 +33,8 @@ function App() {
     currentPopup,
     isVisible: popupVisible,
     handleResponse,
-    skipPopup
+    skipPopup,
+    duration
   } = useEngagementPopups(activeSessionId, !!activeSessionId);
   
   /* ---------------------------
@@ -87,6 +88,7 @@ function App() {
         isVisible={popupVisible}
         onResponse={handleResponse}
         onSkip={skipPopup}
+        duration={duration}
       />
     </>
   );

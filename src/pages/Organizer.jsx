@@ -18,7 +18,7 @@ export default function Organizer() {
     { id: 3, text: "Are you taking notes?", options: ["YES", "NO"], type: "single", correct: 0 }
   ]);
   const [newQuestion, setNewQuestion] = useState({ text: "", options: ["", ""], type: "single", correct: [0] });
-  const [popupSettings, setPopupSettings] = useState({ timing: "fixed", interval: 20 });
+  const [popupSettings, setPopupSettings] = useState({ timing: "fixed", interval: 20, popupDuration: 10 });
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackData, setFeedbackData] = useState([]);
   const [participantScores, setParticipantScores] = useState([]);
@@ -123,33 +123,63 @@ export default function Organizer() {
 
   const viewScores = () => {
     if (!activeSession) return;
+    
+    console.log('=== DEBUG: Checking localStorage for session:', activeSession.sessionId);
+    
     const scores = [];
+    const sessionId = activeSession.sessionId;
     
-    const responses = localStorage.getItem(`responses_${activeSession.sessionId}`);
-    const livenessData = localStorage.getItem(`liveness_${activeSession.sessionId}`);
+    // Check all possible participant data sources
+    const participantIds = ['general', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
     
-    if (responses || livenessData) {
-      const responseData = responses ? JSON.parse(responses) : [];
-      const liveness = livenessData ? JSON.parse(livenessData) : { passed: false };
+    participantIds.forEach(id => {
+      const responseKey = id === 'general' ? `responses_${sessionId}` : `responses_${sessionId}_participant_${id}`;
+      const livenessKey = id === 'general' ? `liveness_${sessionId}` : `liveness_${sessionId}_participant_${id}`;
       
-      const correctAnswers = responseData.filter(r => r.isCorrect).length;
-      const totalQuestions = questions.length;
-      const engagementScore = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-      const livenessScore = liveness.passed ? 100 : 0;
+      const responses = localStorage.getItem(responseKey);
+      const liveness = localStorage.getItem(livenessKey);
       
-      scores.push({
-        participantId: 'Participant 1',
-        totalPopups: totalQuestions,
-        answeredPopups: responseData.filter(r => !r.missed).length,
-        correctAnswers,
-        engagementScore,
-        livenessScore,
-        livenessVerified: liveness.passed || false
-      });
-    }
+      if (responses || liveness) {
+        const responseData = responses ? JSON.parse(responses) : [];
+        const livenessData = liveness ? JSON.parse(liveness) : { passed: false };
+        
+        console.log(`Found data for participant ${id}:`, { responses: responseData, liveness: livenessData });
+        
+        // Calculate metrics based on actual questions asked
+        const totalSent = responseData.length; // Total questions asked (including missed)
+        const answered = responseData.filter(r => !r.missed && r.selectedAnswer !== null && r.selectedAnswer !== undefined).length;
+        const correct = responseData.filter(r => r.isCorrect === true).length;
+        const missed = responseData.filter(r => r.missed === true).length;
+        const wrong = totalSent - correct - missed; // Total - correct - missed = wrong
+        
+        // Engagement score: correct answers out of total questions asked
+        const engagementScore = totalSent > 0 ? Math.round((correct / totalSent) * 100) : 0;
+        
+        // Liveness score
+        const livenessScore = livenessData.passed ? 100 : 0;
+        
+        scores.push({
+          participantId: id === 'general' ? 'Participant' : `Participant ${id}`,
+          totalSent,
+          answered,
+          correct,
+          wrong,
+          missed,
+          engagementScore,
+          livenessScore,
+          livenessVerified: livenessData.passed || false,
+          lastActivity: Math.max(
+            responseData.length > 0 ? Math.max(...responseData.map(r => r.timestamp)) : 0,
+            livenessData.timestamp || 0
+          )
+        });
+      }
+    });
+    
+    console.log('Final calculated scores:', scores);
     
     if (scores.length === 0) {
-      setToast({ message: "No participant data found yet", type: "info" });
+      setToast({ message: "No participant data found. Participants need to scan QR and answer questions.", type: "info" });
     } else {
       setParticipantScores(scores);
     }
@@ -382,7 +412,7 @@ export default function Organizer() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent'
               }}>⚙️ Popup Settings</h3>
-              <div style={{ display: 'flex', gap: '4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '4rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', color: 'white', fontSize: '1.2rem', fontWeight: '600' }}>
                   <input
                     type="radio"
@@ -391,7 +421,7 @@ export default function Organizer() {
                     onChange={() => setPopupSettings(prev => ({ ...prev, timing: "fixed" }))}
                     style={{ width: '24px', height: '24px', accentColor: '#ff6b9d' }}
                   />
-                  <span>Fixed Interval</span>
+                  <span>Manual Control</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', color: 'white', fontSize: '1.2rem', fontWeight: '600' }}>
                   <input
@@ -401,16 +431,42 @@ export default function Organizer() {
                     onChange={() => setPopupSettings(prev => ({ ...prev, timing: "random" }))}
                     style={{ width: '24px', height: '24px', accentColor: '#ff6b9d' }}
                   />
-                  <span>Random</span>
+                  <span>Auto Random</span>
                 </label>
+                {popupSettings.timing === "random" && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <span style={{ color: 'white', fontSize: '1.2rem', fontWeight: '700' }}>Interval:</span>
+                    <input
+                      type="number"
+                      value={popupSettings.interval}
+                      onChange={(e) => setPopupSettings(prev => ({ ...prev, interval: parseInt(e.target.value) || 20 }))}
+                      min="10"
+                      max="120"
+                      style={{
+                        width: '120px',
+                        padding: '16px 20px',
+                        borderRadius: '16px',
+                        border: '2px solid rgba(100,100,200,0.3)',
+                        background: 'rgba(10,10,30,0.8)',
+                        backdropFilter: 'blur(10px)',
+                        color: 'white',
+                        textAlign: 'center',
+                        fontSize: '1.2rem',
+                        fontWeight: '700',
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ color: 'white', fontSize: '1.2rem', fontWeight: '600' }}>seconds</span>
+                  </div>
+                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                  <span style={{ color: 'white', fontSize: '1.2rem', fontWeight: '700' }}>Interval:</span>
+                  <span style={{ color: 'white', fontSize: '1.2rem', fontWeight: '700' }}>Popup Duration:</span>
                   <input
                     type="number"
-                    value={popupSettings.interval}
-                    onChange={(e) => setPopupSettings(prev => ({ ...prev, interval: parseInt(e.target.value) || 20 }))}
-                    min="10"
-                    max="120"
+                    value={popupSettings.popupDuration}
+                    onChange={(e) => setPopupSettings(prev => ({ ...prev, popupDuration: parseInt(e.target.value) || 10 }))}
+                    min="5"
+                    max="60"
                     style={{
                       width: '120px',
                       padding: '16px 20px',
@@ -839,6 +895,39 @@ export default function Organizer() {
                     🎯 View Scores
                   </button>
                   <button
+                    onClick={() => {
+                      // Add test data for debugging
+                      const testResponses = [
+                        { questionId: 1, question: "Are you paying attention?", selectedAnswer: "YES", isCorrect: true, missed: false, timestamp: Date.now() },
+                        { questionId: 2, question: "Is this session helpful?", selectedAnswer: "NO", isCorrect: false, missed: false, timestamp: Date.now() },
+                        { questionId: 3, question: "Are you taking notes?", selectedAnswer: null, isCorrect: false, missed: true, timestamp: Date.now() }
+                      ];
+                      const testLiveness = { passed: true, timestamp: Date.now() };
+                      
+                      localStorage.setItem(`responses_${activeSession.sessionId}`, JSON.stringify(testResponses));
+                      localStorage.setItem(`liveness_${activeSession.sessionId}`, JSON.stringify(testLiveness));
+                      
+                      setToast({ message: "Test data added! Participant answered 3 questions: 1 correct, 1 wrong, 1 missed. Liveness passed.", type: "success" });
+                    }}
+                    style={{
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      color: 'white',
+                      padding: '18px 24px',
+                      borderRadius: '16px',
+                      border: 'none',
+                      fontSize: '1.1rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
+                      transform: 'translateY(0)'
+                    }}
+                    onMouseOver={(e) => e.target.style.transform = 'translateY(-3px)'}
+                    onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                  >
+                    🧪 Add Test Data
+                  </button>
+                  <button
                     onClick={endSession}
                     style={{
                       background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
@@ -1038,22 +1127,26 @@ export default function Organizer() {
                       {score.engagementScore}%
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
                     <div style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: '600', color: '#1f2937', fontSize: '1.2rem' }}>{score.answeredPopups}</div>
+                      <div style={{ fontWeight: '600', color: '#1f2937', fontSize: '1.2rem' }}>{score.totalSent}</div>
+                      <div style={{ color: '#6b7280' }}>Sent</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px' }}>
+                      <div style={{ fontWeight: '600', color: '#1f2937', fontSize: '1.2rem' }}>{score.answered}</div>
                       <div style={{ color: '#6b7280' }}>Answered</div>
                     </div>
                     <div style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: '600', color: '#1f2937', fontSize: '1.2rem' }}>{score.correctAnswers}</div>
+                      <div style={{ fontWeight: '600', color: '#10b981', fontSize: '1.2rem' }}>{score.correct}</div>
                       <div style={{ color: '#6b7280' }}>Correct</div>
                     </div>
                     <div style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: '600', color: '#1f2937', fontSize: '1.2rem' }}>{score.totalPopups}</div>
-                      <div style={{ color: '#6b7280' }}>Total</div>
+                      <div style={{ fontWeight: '600', color: '#ef4444', fontSize: '1.2rem' }}>{score.wrong}</div>
+                      <div style={{ color: '#6b7280' }}>Wrong</div>
                     </div>
                     <div style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: '600', color: score.livenessScore === 100 ? '#10b981' : '#ef4444', fontSize: '1.2rem' }}>{score.livenessScore}%</div>
-                      <div style={{ color: '#6b7280' }}>Liveness</div>
+                      <div style={{ fontWeight: '600', color: '#6b7280', fontSize: '1.2rem' }}>{score.missed}</div>
+                      <div style={{ color: '#6b7280' }}>Missed</div>
                     </div>
                   </div>
                   <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

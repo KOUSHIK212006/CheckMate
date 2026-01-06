@@ -1,4 +1,4 @@
-export default function EngagementPopup({ popup, isVisible, onResponse, onSkip }) {
+export default function EngagementPopup({ popup, isVisible, onResponse, onSkip, duration = 10 }) {
   if (!isVisible || !popup) return null;
 
   return (
@@ -68,7 +68,7 @@ export default function EngagementPopup({ popup, isVisible, onResponse, onSkip }
         color: 'rgba(255,255,255,0.6)',
         textAlign: 'center'
       }}>
-        Optional • Auto-closes in 8s
+        Optional • Auto-closes in {duration}s
       </p>
     </div>
   );

@@ -66,6 +66,9 @@ export default function Scan() {
             setScannedData(sessionData.sessionId);
             setMeetLink(sessionData.meetLink);
             
+            // Store active session ID for engagement popups
+            localStorage.setItem('activeSessionId', sessionData.sessionId);
+            
             // Stop scanner and proceed
             scanner.clear().then(() => {
               setStep('liveness-start');
@@ -82,6 +85,9 @@ export default function Scan() {
           
           if (decodedText && sessionIdPattern.test(decodedText)) {
             setScannedData(decodedText);
+            
+            // Store active session ID for engagement popups
+            localStorage.setItem('activeSessionId', decodedText);
             
             // Get session data from localStorage as fallback
             const storedSession = localStorage.getItem('currentSession');
@@ -147,6 +153,14 @@ export default function Scan() {
   };
 
   const handleLivenessResult = (passed) => {
+    // Save liveness result to localStorage
+    const livenessData = {
+      passed,
+      timestamp: Date.now(),
+      sessionId: scannedData
+    };
+    localStorage.setItem(`liveness_${scannedData}`, JSON.stringify(livenessData));
+    
     if (passed) {
       setStep('meet-ready');
       setToast({ message: "All tasks completed! Attendance marked successfully.", type: "success" });

@@ -1,90 +1,191 @@
-# Checkmate — QR-based attendance (Frontend)
+# Checkmate — Smart QR-based Attendance System
 
-This repository contains the frontend for "Checkmate", a small React + Vite single-page app that demonstrates QR-based session creation (organizer) and QR scanning (participant).
+A modern React application for intelligent attendance tracking with real-time engagement monitoring, face verification, and comprehensive analytics. Built with a sleek dark theme and glassmorphism design.
 
-What this repo includes
-- Organizer view: create a session string and generate a QR image to present to participants (`src/pages/Organizer.jsx`).
-- Participant/Scan view: scan a QR code using the device camera (`src/pages/Scan.jsx`) via `html5-qrcode`.
-- Small UI components and styling in `src/`.
+## ✨ Key Features
 
-Tech stack
-- React 19 (JSX)
-- Vite dev server and build
-- html5-qrcode for camera-based scanning
-- qrcode for QR image generation (data URLs)
+### 🎯 **Smart Attendance Tracking**
+- QR code generation and scanning for seamless check-ins
+- Real-time face verification during attendance
+- Automated liveness scoring based on participant engagement
+- Session management with detailed analytics
 
-Quick start (Windows / PowerShell)
+### 📊 **Engagement Monitoring**
+- Dynamic popup questions during sessions
+- Configurable timing modes (Manual/Auto Random)
+- Real-time engagement scoring and statistics
+- Comprehensive participant response tracking
 
-1. Install dependencies
+### 🎨 **Modern UI/UX**
+- Dark theme with glassmorphism effects
+- Smooth animations and transitions
+- Responsive design for all devices
+- Professional gradient styling
 
-```powershell
+## 🛠️ Tech Stack
+- **React 19** - Modern JSX with hooks
+- **Vite** - Fast development and build tooling
+- **html5-qrcode** - Camera-based QR scanning
+- **qrcode** - QR code generation
+- **CSS3** - Advanced styling with backdrop-filter and animations
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- Modern browser with camera access
+- Windows/macOS/Linux
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd checkmate-frontend
+
+# Install dependencies
 npm install
-```
 
-2. Start dev server
-
-```powershell
+# Start development server
 npm run dev
 ```
 
-3. Open your browser at the address printed by Vite (usually http://localhost:5173)
+### Access the Application
+Open your browser at `http://localhost:5173` (default Vite port)
 
-Usage notes
-- To create a session QR: open the Organizer page, enter an optional session name or leave blank, then click "Create Session & Generate QR". A QR image will appear which you can download.
-- To scan a session QR: open the Scan page (the app uses `html5-qrcode`). Allow camera access when prompted. When a valid QR is decoded, the scanned text is shown in the console and via an alert (the project currently alerts with the decoded text).
+## 📱 How to Use
 
-Files of interest
-- `src/pages/Organizer.jsx` — Organizer dashboard and QR generation UI.
-- `src/pages/Scan.jsx` — QR scanning logic using `html5-qrcode` (already working).
-- `src/App.jsx` and `src/main.jsx` — app wiring and routing.
-- `package.json` — scripts and dependencies.
+### For Organizers
+1. **Create Session**: Enter session name and configure settings
+2. **Generate QR Code**: Download and display QR for participants
+3. **Manage Questions**: Add engagement questions with correct answers
+4. **Configure Popups**: Set timing mode (Manual/Auto) and duration
+5. **Monitor Analytics**: View real-time engagement scores and statistics
 
-Available scripts
-- `npm run dev` — start Vite development server
-- `npm run build` — produce production build
-- `npm run preview` — preview production build
-- `npm run lint` — run ESLint
+### For Participants
+1. **Scan QR Code**: Use camera to scan session QR
+2. **Face Verification**: Complete liveness check for attendance
+3. **Answer Questions**: Respond to popup engagement questions
+4. **View Confirmation**: See attendance verification with session details
 
-Small notes about the QR features
-- Scanning: implemented with `html5-qrcode` in `src/pages/Scan.jsx`. The scanner renders into an element with id `qr-reader` and calls back with the decoded text.
-- Generation: implemented using the `qrcode` package which produces a data URL image. The Organizer UI now exposes a session name input, a generate button, and displays the resulting QR (with a download link).
+## 📁 Project Structure
 
-Recommendations & possible improvements
-1. Improve UX
-	- Replace the alert on successful scan with an in-app confirmation modal and a friendly checkmark animation.
-	- Show scan history and allow organizer to see who scanned (requires backend).
+### Core Pages
+- `src/pages/Organizer.jsx` — Complete organizer dashboard with analytics
+- `src/pages/Scan.jsx` — QR scanning with face verification flow
+- `src/pages/AttendanceVerified.jsx` — Success page with session details
 
-2. Add a small backend or serverless API
-	- A backend to create and store sessions, issue signed/short-lived tokens, and record attendance would make the system production-ready.
-	- QR payloads should be signed or session IDs mapped server-side to prevent spoofing.
+### Components
+- `src/components/Card.jsx` — Glassmorphism card component
+- `src/components/Button.jsx` — Modern gradient buttons
+- `src/components/Toast.jsx` — Notification system
+- `src/components/EngagementPopup.jsx` — Dynamic question popups
 
-3. TypeScript
-	- Add TypeScript for stronger typing and better IDE support.
+### Hooks & Logic
+- `src/hooks/useEngagementPopups.js` — Engagement system logic
+- `src/App.jsx` — Main app routing and layout
+- `src/App.css` — Comprehensive styling system
 
-4. Tests & CI
-	- Add unit tests for components (React Testing Library + Vitest/Jest) and wire up GitHub Actions for builds and tests.
+## 🔧 Available Scripts
 
-5. Accessibility & mobile
-	- Ensure inputs and buttons are accessible (labels, aria-*) and test scanner UI on a variety of mobile devices.
+```bash
+npm run dev      # Start development server with hot reload
+npm run build    # Create optimized production build
+npm run preview  # Preview production build locally
+npm run lint     # Run ESLint for code quality
+```
 
-6. Linting & formatting
-	- Enforce consistent code style with Prettier and extend ESLint rules to cover best practices.
+## 🔍 Technical Implementation
 
-7. Security
-	- Avoid placing sensitive info in QR payloads. If you must, encrypt or sign the payload.
+### QR Code System
+- **Scanning**: Advanced `html5-qrcode` integration with custom styling
+- **Generation**: High-quality QR codes with download functionality
+- **Verification**: Real-time validation and error handling
 
-8. Performance & production
-	- Optimize bundle sizes, lazy-load pages (scan page can be lazy), and consider offline strategies if needed.
+### Engagement System
+- **Popup Management**: Configurable timing and duration controls
+- **Score Calculation**: Accurate engagement metrics (correct/total questions)
+- **Data Persistence**: localStorage integration for session tracking
 
-If you'd like, I can:
-- wire up a minimal backend (Express or serverless function) to create session IDs and verify scans; or
-- add TypeScript conversions for a single page; or
-- implement a nicer scan-result UI and persist scans locally.
+### Face Verification
+- **Liveness Detection**: Ensures real participant presence
+- **Security**: Prevents attendance spoofing
+- **User Experience**: Smooth verification flow with feedback
 
-Contact/Contributing
-If you want me to make any of the improvements above or to adjust the README further, tell me which item to prioritize and I’ll implement it next.
+## 🎯 Current Features
+
+### ✅ **Implemented**
+- Modern dark theme with glassmorphism design
+- Complete engagement popup system with timing controls
+- Real-time liveness scoring and analytics
+- Face verification during attendance
+- Professional UI with smooth animations
+- Responsive design for all devices
+- Advanced QR scanning with custom styling
+- Session management and statistics
+- localStorage data persistence
+
+### 🚀 **Future Enhancements**
+
+#### Backend Integration
+- RESTful API for session management
+- Real-time participant tracking
+- Secure token-based authentication
+- Cloud data synchronization
+
+#### Advanced Features
+- TypeScript migration for better type safety
+- Comprehensive test suite (Jest/Vitest)
+- CI/CD pipeline with GitHub Actions
+- PWA capabilities for offline use
+
+#### Security & Performance
+- Encrypted QR payloads
+- Bundle optimization and lazy loading
+- Enhanced accessibility (WCAG compliance)
+- Advanced analytics dashboard
+
+## 🎨 Design System
+
+### Color Palette
+- **Primary**: Gradient blues and purples
+- **Background**: Dark theme with subtle patterns
+- **Glass Effects**: Backdrop-filter blur with transparency
+- **Accents**: Success greens, warning oranges, error reds
+
+### Typography
+- **Headings**: Bold, modern font weights
+- **Body**: Clean, readable text with proper contrast
+- **Interactive**: Hover states and smooth transitions
+
+## 📊 Data Management
+
+### localStorage Schema
+```javascript
+// Session data
+`session_${sessionId}` // Session configuration
+`questions_${sessionId}` // Question bank
+`responses_${sessionId}` // Participant responses
+`liveness_${sessionId}` // Engagement scores
+```
+
+### Engagement Scoring
+- **Formula**: (Correct Answers / Total Questions Sent) × 100
+- **Real-time**: Updates as participants respond
+- **Persistent**: Stored across browser sessions
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to:
+- Report bugs and issues
+- Suggest new features
+- Submit pull requests
+- Improve documentation
+
+## 📄 License
+
+This project is open source and available under the MIT License.
 
 ---
-Small verification performed in this edit session
-- Implemented QR generation in `src/pages/Organizer.jsx` using the `qrcode` package and added the package to `package.json`.
-- Please run `npm install` locally and then `npm run dev` to verify everything on your machine.
+
+**Ready to use!** Run `npm install && npm run dev` to start the development server.
